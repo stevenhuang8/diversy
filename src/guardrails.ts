@@ -2,7 +2,7 @@
 
 export const APPROVED_LINK_HOST = "go.acme-invest.example";
 
-const PROHIBITED_CLAIMS = /\b(guaranteed?|risk[- ]free|no risk|can'?t lose)\b/gi;
+const PROHIBITED_CLAIMS = /\b(guaranteed?|risk[- ]free|no risk|can['’]?t lose)\b/i;
 const URL_PATTERN = /https?:\/\/\S+/i;
 
 export type Violation = "prohibited_claim" | "unapproved_link";
