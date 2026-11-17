@@ -29,8 +29,16 @@ export function detectEncoding(text: string): Encoding {
 
 export function countSegments(text: string): SegmentInfo {
   const encoding = detectEncoding(text);
-  const units = text.length;
-  const limit = encoding === "GSM-7" ? 160 : 70;
-  const segments = units === 0 ? 0 : Math.ceil(units / limit);
+  let units = text.length;
+  if (encoding === "GSM-7") {
+    units = 0;
+    for (const ch of text) {
+      units += GSM7_EXTENSION.has(ch) ? 2 : 1;
+    }
+  }
+  // Multipart messages lose 7 bytes per segment to the concatenation header (SPEC §5).
+  const single = encoding === "GSM-7" ? 160 : 70;
+  const multi = encoding === "GSM-7" ? 153 : 67;
+  const segments = units === 0 ? 0 : units <= single ? 1 : Math.ceil(units / multi);
   return { encoding, units, segments };
 }
