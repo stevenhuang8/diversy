@@ -40,7 +40,7 @@ export async function dispatchCampaign(
     ? await personalizeAll(deps.llm, campaign, eligible, { ...DEFAULT_PERSONALIZE, ...deps.personalize })
     : eligible.map((recipient) => ({ recipientId: recipient.id, body: null }));
 
-  eligible.forEach(async (recipient, index) => {
+  for (const [index, recipient] of eligible.entries()) {
     let body = personalized[index].body;
     let isPersonalized = body !== null;
 
@@ -55,7 +55,7 @@ export async function dispatchCampaign(
       } catch (error) {
         if (error instanceof MissingVariableError) {
           result.skipped.push({ recipientId: recipient.id, reason: "template_error" });
-          return;
+          continue;
         }
         throw error;
       }
@@ -64,7 +64,7 @@ export async function dispatchCampaign(
     const { segments } = countSegments(body);
     if (segments > campaign.maxSegments) {
       result.skipped.push({ recipientId: recipient.id, reason: "over_budget" });
-      return;
+      continue;
     }
 
     // Unique key per message so the vendor never drops a send.
@@ -74,7 +74,7 @@ export async function dispatchCampaign(
       body,
     });
     result.sent.push({ recipientId: recipient.id, body, segments, personalized: isPersonalized });
-  });
+  }
 
   return result;
 }
